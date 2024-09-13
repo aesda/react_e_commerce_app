@@ -1,30 +1,17 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/aspect-ratio'),
-    ],
-  }
-  ```
-*/
+
 import { Link, useParams } from "react-router-dom";
 import productData from "../data/productData";
 
   
   export default function CategoryProducts() {
     const { category } = useParams();
-    const currentCategory = productData.categories.filter(item => item.id ===category)
+    const currentCategory = productData.categories.find(item => item.id ===category)
     const products = currentCategory?.products;
 
     return (
       <div className="bg-white">
         <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">New Arrivals</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{currentCategory.category}</h1>
 
         
             
@@ -40,8 +27,8 @@ import productData from "../data/productData";
                         </div>
                     </li>
                     <li className="text-sm">
-                        <Link to="/categories" aria-current="page" className="font-medium text-gray-500 hover:text-gray-600">
-                            New Arrivals
+                        <Link to={`/categories/${currentCategory.id}`} aria-current="page" className="font-medium text-gray-500 hover:text-gray-600">
+                           {currentCategory.category}
                         </Link>
                     </li>
         </ol>
@@ -59,7 +46,7 @@ import productData from "../data/productData";
                 <div className="mt-4 flex justify-between">
                   <div>
                     <h3 className="text-sm text-gray-700">
-                      <Link to ="/product">
+                      <Link to ={`/categories/${currentCategory.id}/products/${product.id}`}>
                         <span aria-hidden="true" className="absolute inset-0" />
                         {product.name}
                       </Link>

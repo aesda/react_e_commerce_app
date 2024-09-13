@@ -1,28 +1,17 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/typography'),
-    ],
-  }
-  ```
-*/
+
 'use client'
 
-import { useState } from 'react'
+
 import { StarIcon } from '@heroicons/react/20/solid'
-import { Radio, RadioGroup } from '@headlessui/react'
+
 import { CurrencyDollarIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline'
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom'
+import { useNavigate, useParams} from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
+import productData from '../data/productData';
 
 
-const product = {
+const product2 = {
   name: 'Basic Tee',
   price: '$35',
   rating: 3.9,
@@ -85,11 +74,19 @@ function classNames(...classes) {
 }
 
 export default function Product() {
-    const navigate = useNavigate();
-  const [selectedColor, setSelectedColor] = useState(product.colors[0])
-  const [selectedSize, setSelectedSize] = useState(product.sizes[2])
+  const [cookies, setCookie] = useCookies(['cart']);
+  const { category, product } = useParams();
+  const navigate = useNavigate();
+
+  const currentCategory = productData.categories.find(item => item.id === category);
+    const products = currentCategory?.products;
+    const currentProduct = products.find(item => item.id == product);
+
+
 
   function addToCart() {
+    const cartValue = cookies.cart ? JSON.parse(cookies.cart) : [];
+    setCookie('cart', JSON.stringify){category currentCategory.id,product: currentProduct.id } )
     navigate("/cart");
 
   }
@@ -101,8 +98,8 @@ export default function Product() {
         <ol role="list" className="flex items-center space-x-4 py-8">
                     <li >
                         <div className="flex items-center">
-                            <Link to="/" className="mr-4 text-sm font-medium text-gray-900">
-                                Home
+                            <Link to={`/categories/${currentCategory.id}`} className="mr-4 text-sm font-medium text-gray-900">
+                               {currentCategories.category}
                             </Link>
                             <svg viewBox="0 0 6 20" aria-hidden="true" className="h-5 w-auto text-gray-300">
                                 <path d="M4.878 4.34H3.551L.27 16.532h1.327l3.281-12.19z" fill="currentColor" />
@@ -120,7 +117,7 @@ export default function Product() {
                         </div>
                     </li>
                     <li className="text-sm">
-                        <Link to="/product" aria-current="page" className="font-medium text-gray-500 hover:text-gray-600">
+                        <Link to={`/categories/${currentCategory.id}`} aria-current="page" className="font-medium text-gray-500 hover:text-gray-600">
                             Basic Tee
                         </Link>
                     </li>
@@ -130,8 +127,8 @@ export default function Product() {
           <div className="lg:grid lg:auto-rows-min lg:grid-cols-12 lg:gap-x-8">
             <div className="lg:col-span-5 lg:col-start-8">
               <div className="flex justify-between">
-                <h1 className="text-xl font-medium text-gray-900">{product.name}</h1>
-                <p className="text-xl font-medium text-gray-900">{product.price}</p>
+                <h1 className="text-xl font-medium text-gray-900">{currentProduct.name}</h1>
+                <p className="text-xl font-medium text-gray-900">{currentProduct.price}</p>
               </div>
               {/* Reviews */}
               <div className="mt-4">
@@ -147,7 +144,7 @@ export default function Product() {
                         key={rating}
                         aria-hidden="true"
                         className={classNames(
-                          product.rating > rating ? 'text-yellow-400' : 'text-gray-200',
+                          currentProduct.rating > rating ? 'text-yellow-400' : 'text-gray-200',
                           'h-5 w-5 flex-shrink-0',
                         )}
                       />
@@ -158,7 +155,7 @@ export default function Product() {
                   </div>
                   <div className="ml-4 flex">
                     <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                      See all {product.reviewCount} reviews
+                      See all {currentProduct.reviewCount || 0} reviews
                     </a>
                   </div>
                 </div>
@@ -186,71 +183,6 @@ export default function Product() {
 
             <div className="mt-8 lg:col-span-5">
               <form>
-                {/* Color picker */}
-                <div>
-                  <h2 className="text-sm font-medium text-gray-900">Color</h2>
-
-                  <fieldset aria-label="Choose a color" className="mt-2">
-                    <RadioGroup
-                      value={selectedColor}
-                      onChange={setSelectedColor}
-                      className="flex items-center space-x-3"
-                    >
-                      {product.colors.map((color) => (
-                        <Radio
-                          key={color.name}
-                          value={color}
-                          aria-label={color.name}
-                          className={classNames(
-                            color.selectedColor,
-                            'relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none data-[checked]:ring-2 data-[focus]:data-[checked]:ring data-[focus]:data-[checked]:ring-offset-1',
-                          )}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              color.bgColor,
-                              'h-8 w-8 rounded-full border border-black border-opacity-10',
-                            )}
-                          />
-                        </Radio>
-                      ))}
-                    </RadioGroup>
-                  </fieldset>
-                </div>
-
-                {/* Size picker */}
-                <div className="mt-8">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-medium text-gray-900">Size</h2>
-                    <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                      See sizing chart
-                    </a>
-                  </div>
-
-                  <fieldset aria-label="Choose a size" className="mt-2">
-                    <RadioGroup
-                      value={selectedSize}
-                      onChange={setSelectedSize}
-                      className="grid grid-cols-3 gap-3 sm:grid-cols-6"
-                    >
-                      {product.sizes.map((size) => (
-                        <Radio
-                          key={size.name}
-                          value={size}
-                          disabled={!size.inStock}
-                          className={classNames(
-                            size.inStock ? 'cursor-pointer focus:outline-none' : 'cursor-not-allowed opacity-25',
-                            'flex items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-3 text-sm font-medium uppercase text-gray-900 hover:bg-gray-50 data-[checked]:border-transparent data-[checked]:bg-indigo-600 data-[checked]:text-white data-[focus]:ring-2 data-[focus]:ring-indigo-500 data-[focus]:ring-offset-2 data-[checked]:hover:bg-indigo-700 sm:flex-1',
-                          )}
-                        >
-                          {size.name}
-                        </Radio>
-                      ))}
-                    </RadioGroup>
-                  </fieldset>
-                </div>
-
                 <button
                   type="submit"
                   onClick= {addToCart}
@@ -265,7 +197,7 @@ export default function Product() {
                 <h2 className="text-sm font-medium text-gray-900">Description</h2>
 
                 <div
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{ __html: currentProduct.description || '-'}}
                   className="prose prose-sm mt-4 text-gray-500"
                 />
               </div>
